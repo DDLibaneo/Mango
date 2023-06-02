@@ -3,7 +3,7 @@
     /// <summary>
     /// Static Details
     /// </summary>
-    public class SD
+    public static class SD
     {
         public enum ApiType
         {
