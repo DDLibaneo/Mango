@@ -9,7 +9,6 @@ namespace Mango.Web.Services
         private readonly IBaseService _baseService;
         private readonly string COUPON_ROUTE = "/api/coupon/";
 
-
         public CouponService(IBaseService baseService)
         {
             _baseService = baseService;
