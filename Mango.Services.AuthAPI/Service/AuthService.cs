@@ -21,10 +21,34 @@ namespace Mango.Services.AuthAPI.Service
 
         public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
         {
-            throw new NotImplementedException();
+            var user = _db.ApplicationUsers
+                 .FirstOrDefault(u => u.NormalizedUserName == loginRequestDto.UserName.ToUpper());
+
+            bool isValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
+
+            if (user == null || !isValid)
+                return new LoginResponseDto { User = null, Token = "" };
+
+            // if user was found, generate JWT Token
+
+            var userDto = new UserDto
+            {
+                Email = user.Email,
+                Id = user.Id,
+                Name = user.Name,
+                PhoneNumber = user.PhoneNumber
+            };
+
+            var loginResponseDto = new LoginResponseDto
+            {
+                Token = "",
+                User = userDto
+            };
+
+            return loginResponseDto;
         }
 
-        public async Task<UserDto> Register(RegistrationRequestDto registrationRequestDto)
+        public async Task<string> Register(RegistrationRequestDto registrationRequestDto)
         {
             var user = new ApplicationUser
             {
@@ -41,7 +65,8 @@ namespace Mango.Services.AuthAPI.Service
 
                 if (result.Succeeded)
                 {
-                    var userToReturn = _db.ApplicationUsers.First(u => u.Email.ToUpper() == registrationRequestDto.Email.ToUpper());
+                    var userToReturn = _db.ApplicationUsers
+                        .First(u => u.NormalizedEmail == registrationRequestDto.Email.ToUpper());
 
                     var dto = new UserDto
                     {
@@ -51,15 +76,17 @@ namespace Mango.Services.AuthAPI.Service
                         PhoneNumber = userToReturn.PhoneNumber
                     };
 
-                    return dto;
+                    return "";
                 }
+                else
+                    return result.Errors.FirstOrDefault().Description;
             }
             catch (Exception ex)
             {
 
             }
 
-            return new UserDto();
+            return "Error encountered";
         }
     }
 }
