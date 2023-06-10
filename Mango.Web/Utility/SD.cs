@@ -3,15 +3,17 @@
     /// <summary>
     /// Static Details
     /// </summary>
-    public static class SD
+    public class SD
     {
         public static string CouponAPIBase { get; set; }
 
         public static string AuthAPIBase { get; set; }
 
-        public static string RoleAdmin { get; set; } = "ADMIN";
+        public const string RoleAdmin = "ADMIN";
 
-        public static string RoleCustomer { get; set; } = "CUSTOMER";
+        public const string RoleCustomer = "CUSTOMER";
+
+        public const string TokenCookie = "JWTToken";
 
         public enum ApiType
         {
