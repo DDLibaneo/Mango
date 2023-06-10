@@ -8,6 +8,11 @@
         public static string CouponAPIBase { get; set; }
 
         public static string AuthAPIBase { get; set; }
+
+        public static string RoleAdmin { get; set; } = "ADMIN";
+
+        public static string RoleCustomer { get; set; } = "CUSTOMER";
+
         public enum ApiType
         {
             GET,
