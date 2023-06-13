@@ -46,9 +46,10 @@ namespace Mango.Web.Controllers
                 _tokenProvider.SetToken(loginResponseDto.Token);
 
                 return RedirectToAction("Index", "Home");
-            }
-             
-            ModelState.AddModelError("CustomError", responseDto.Message);            
+            }            
+                
+            TempData["error"] = responseDto.Message;
+            //ModelState.AddModelError("CustomError", responseDto.Message);            
             return View(obj);            
         }
 
@@ -85,6 +86,8 @@ namespace Mango.Web.Controllers
                     return RedirectToAction(nameof(Login));
                 }
             }
+            else            
+                TempData["error"] = result.Message;            
 
             var roleList = new List<SelectListItem>
             {
@@ -123,7 +126,9 @@ namespace Mango.Web.Controllers
                 new Claim(JwtRegisteredClaimNames.Name, 
                     jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Name).Value),
                 new Claim(ClaimTypes.Name, 
-                    jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email).Value)
+                    jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email).Value),
+                new Claim(ClaimTypes.Role,
+                    jwt.Claims.FirstOrDefault(c => c.Type == "role").Value)
             };
 
             identity.AddClaims(claims);
