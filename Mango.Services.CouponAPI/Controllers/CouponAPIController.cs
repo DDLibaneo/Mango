@@ -88,7 +88,6 @@ namespace Mango.Services.CouponAPI.Controllers
                 _db.SaveChanges();
 
                 _response.Result = _mapper.Map<CouponDto>(obj);
-
             }
             catch (Exception ex)
             {
@@ -110,7 +109,6 @@ namespace Mango.Services.CouponAPI.Controllers
                 _db.SaveChanges();
 
                 _response.Result = _mapper.Map<CouponDto>(obj);
-
             }
             catch (Exception ex)
             {
