@@ -1,11 +1,12 @@
 ﻿@model ProductDto
 
-<form asp-action="ProductCreate">
+<form asp-action="ProductEdit">
     <br />
     <div class="container border p-3">
-        <h1 class="text-white text-center">Create Product</h1>
+        <h1 class="text-white text-center">Edit Product</h1>
         <hr />
         <div class="row">
+            <input asp-for="ProductId" hidden />
             <div class="col-2">
                 <label class="control-label pt-2" style="font-size:20px;">Name</label>
             </div>
@@ -45,7 +46,7 @@
                 <a asp-action="ProductIndex" class="btn-primary btn form-control ">Back to List</a>
             </div>
             <div class="col-5">
-                <input type="submit" value="Create" class="btn btn-success form-control" />
+                <input type="submit" value="Edit" class="btn btn-success form-control" />
             </div>
         </div>
     </div>
