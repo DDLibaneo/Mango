@@ -10,8 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Mango.Services.ProductAPI.Controllers
 {
     [Route("api/product")]
-    [ApiController]
-    [Authorize]
+    [ApiController]    
     public class ProductApiController : ControllerBase
     {
         private readonly AppDbContext _db;
