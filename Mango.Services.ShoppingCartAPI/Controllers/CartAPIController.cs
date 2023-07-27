@@ -2,6 +2,7 @@
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.Dto;
+using Mango.Services.ShoppingCartAPI.Models.Dto.In;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpPost("CartUpsert")]
-        public async Task<ResponseDto> CartUpsert(CartDto cartDto)
+        public async Task<ResponseDto> CartUpsert(CartDtoIn cartDto)
         {
             try
             {
@@ -81,12 +82,16 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                         await _db.SaveChangesAsync();
                     }
                 }
+
+                _response.Result = cartDto;
             }
             catch (Exception ex)
             {
                 _response.Message = ex.Message.ToString();
                 _response.IsSuccess = false;
             }
+
+            return _response;
         }
     }
 }
