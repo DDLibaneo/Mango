@@ -12,7 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+    option.EnableSensitiveDataLogging();
+}, ServiceLifetime.Transient, ServiceLifetime.Transient);
 
 //Mapper
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();

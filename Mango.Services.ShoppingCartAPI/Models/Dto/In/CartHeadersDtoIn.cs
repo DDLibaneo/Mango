@@ -1,6 +1,6 @@
-﻿namespace Mango.Services.ShoppingCartAPI.Models.Dto
+﻿namespace Mango.Services.ShoppingCartAPI.Models.Dto.In
 {
-    public class CartHeaderDto
+    public class CartHeadersDtoIn
     {
         public int CartHeaderId { get; set; }
 
