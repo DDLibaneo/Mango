@@ -40,28 +40,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 if (cartHeaderFromDb == null)
                     await CreateHeaderAndDetails(cartDtoIn);
                 else
-                {
-                    // if header is not null 
-                    // check if details has same product
-                    var productIdDto = cartDtoIn.CartDetails.First().ProductId;
-                    var cartHeaderIdDto =  cartHeaderFromDb.CartHeaderId;
-
-                    var cartDetailsFromDb = await _db.CartDetails
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(c => c.ProductId == productIdDto 
-                            && c.CartHeaderId == cartHeaderIdDto);
-
-                    if (cartDetailsFromDb == null)
-                    {
-                        CreateCartDetails(cartDtoIn, cartHeaderFromDb);
-                        await _db.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        UpdateCountInCartDetails(cartDtoIn, cartDetailsFromDb);
-                        await _db.SaveChangesAsync();
-                    }
-                }
+                    await CreateOrUpdateCartDetailsAsync(cartDtoIn, cartHeaderFromDb);
 
                 _response.Result = cartDtoIn;
             }
@@ -113,31 +92,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             return _response;
         }
 
-        private void UpdateCountInCartDetails(CartDtoIn cartDtoIn, CartDetails? cartDetailsFromDb)
-        {
-            #region verifications
-            if (cartDtoIn.CartDetails == null)
-            {
-                var message = @$"Property {nameof(cartDtoIn.CartDetails)} of object {nameof(cartDtoIn)} was null.";
-                throw new Exception(message);
-            }
-
-            if (cartDetailsFromDb == null)
-            {
-                var message = $"Parameter null on method {UpdateCountInCartDetails}";
-                throw new ArgumentNullException(nameof(cartDetailsFromDb), message);
-            }
-            #endregion
-
-            cartDtoIn.CartDetails.First().Count += cartDetailsFromDb.Count;
-            cartDtoIn.CartDetails.First().CartHeaderId = cartDetailsFromDb.CartHeaderId;
-            cartDtoIn.CartDetails.First().CartDetailsId = cartDetailsFromDb.CartDetailsId;
-
-            var cartDetails = _mapper.Map<CartDetails>(cartDtoIn.CartDetails.First());
-            _db.CartDetails.Update(cartDetails);
-        }
-
-        private void CreateCartDetails(CartDtoIn cartDtoIn, CartHeaders? cartHeaderFromDb)
+        private async Task CreateOrUpdateCartDetailsAsync(CartDtoIn cartDtoIn, CartHeaders? cartHeaderFromDb)
         {
             #region verifications
             if (cartDtoIn.CartDetails == null)
@@ -148,7 +103,64 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
 
             if (cartHeaderFromDb == null)
             {
-                var message = $"Parameter null on method {CreateCartDetails}";
+                var message = $"Parameter null on method {CreateOrUpdateCartDetailsAsync}";
+                throw new ArgumentNullException(nameof(cartHeaderFromDb), message);
+            }
+            #endregion
+
+            // check if details has same product
+            var productIdDto = cartDtoIn.CartDetails.First().ProductId;
+            var cartHeaderIdDto = cartHeaderFromDb.CartHeaderId;
+
+            var cartDetailsFromDb = await _db.CartDetails
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.ProductId == productIdDto
+                    && c.CartHeaderId == cartHeaderIdDto);
+
+            if (cartDetailsFromDb == null)
+                await CreateCartDetailsAsync(cartDtoIn, cartHeaderFromDb);
+            else
+                await UpdateCountInCartDetailsAsync(cartDtoIn, cartDetailsFromDb);
+        }
+
+        private async Task UpdateCountInCartDetailsAsync(CartDtoIn cartDtoIn, CartDetails? cartDetailsFromDb)
+        {
+            #region verifications
+            if (cartDtoIn.CartDetails == null)
+            {
+                var message = @$"Property {nameof(cartDtoIn.CartDetails)} of object {nameof(cartDtoIn)} was null.";
+                throw new Exception(message);
+            }
+
+            if (cartDetailsFromDb == null)
+            {
+                var message = $"Parameter null on method {UpdateCountInCartDetailsAsync}";
+                throw new ArgumentNullException(nameof(cartDetailsFromDb), message);
+            }
+            #endregion
+
+            cartDtoIn.CartDetails.First().Count += cartDetailsFromDb.Count;
+            cartDtoIn.CartDetails.First().CartHeaderId = cartDetailsFromDb.CartHeaderId;
+            cartDtoIn.CartDetails.First().CartDetailsId = cartDetailsFromDb.CartDetailsId;
+
+            var cartDetails = _mapper.Map<CartDetails>(cartDtoIn.CartDetails.First());
+            _db.CartDetails.Update(cartDetails);
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task CreateCartDetailsAsync(CartDtoIn cartDtoIn, CartHeaders? cartHeaderFromDb)
+        {
+            #region verifications
+            if (cartDtoIn.CartDetails == null)
+            {
+                var message = @$"Property {nameof(cartDtoIn.CartDetails)} of object {nameof(cartDtoIn)} was null.";
+                throw new Exception(message);
+            }
+
+            if (cartHeaderFromDb == null)
+            {
+                var message = $"Parameter null on method {CreateCartDetailsAsync}";
                 throw new ArgumentNullException(nameof(cartHeaderFromDb), message);
             }
             #endregion
@@ -157,6 +169,8 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
 
             var cartDetails = _mapper.Map<CartDetails>(cartDtoIn.CartDetails.First());
             _db.CartDetails.Add(cartDetails);
+
+            await _db.SaveChangesAsync();
         }
 
         private async Task CreateHeaderAndDetails(CartDtoIn cartDtoIn)
