@@ -98,5 +98,42 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
 
             return _response;
         }
+
+        [HttpPost("RemoveCart/{cartDetailsId}")]
+        public async Task<ResponseDto> RemoveCart([FromRoute] int cartDetailsId)
+        {
+            try
+            {
+                if (cartDetailsId == 0)
+                    throw new ArgumentException("parameter value was 0", nameof(cartDetailsId));
+
+                var cartDetails = await _db.CartDetails.FirstOrDefaultAsync(c => c.CartDetailsId == cartDetailsId) 
+                    ?? throw new Exception($"CartDetails of Id {cartDetailsId} was not found.");
+                
+                var totalCountOfCartItem = await _db.CartDetails.CountAsync(c => c.CartDetailsId == cartDetailsId);
+
+                _db.CartDetails.Remove(cartDetails);
+
+                if (totalCountOfCartItem == 1) 
+                { 
+                    var cartHeaderToRemove = await _db.CartHeaders
+                        .FirstOrDefaultAsync(c => c.CartHeaderId == cartDetails.CartHeaderId) 
+                            ?? throw new Exception($"CartHeader of Id {cartDetails.CartHeaderId} was not found.");
+                    
+                    _db.CartHeaders.Remove(cartHeaderToRemove);
+                }
+
+                await _db.SaveChangesAsync();
+
+                _response.Result = true;
+            }
+            catch (Exception ex)
+            {
+                _response.Message = ex.Message.ToString();
+                _response.IsSuccess = false;
+            }
+
+            return _response;
+        }
     }
 }
