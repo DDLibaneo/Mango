@@ -25,6 +25,37 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             _response = new ResponseDto();
         }
 
+        [HttpGet("GetCart/{userId}")]
+        public async Task<ResponseDto> GetCart([FromRoute] string userId)
+        {
+            try
+            {
+                var cartHeaderFromDb = _db.CartHeaders.FirstOrDefault(c => c.UserId == userId) 
+                    ?? throw new Exception($"cartHeader of userId {userId} could not be found.");
+
+                var cartDetailsFromDb = _db.CartDetails.Where(c => c.CartHeaderId == cartHeaderFromDb.CartHeaderId);
+
+                var cartDto = new CartDto
+                {
+                    CartHeader = _mapper.Map<CartHeadersDto>(cartHeaderFromDb),
+                    CartDetails = _mapper.Map<IEnumerable<CartDetailsDto>>(cartDetailsFromDb)
+                };
+
+                foreach (var item in cartDto.CartDetails)
+                    cartDto.CartHeader.CartTotal += (item.Count * item.Product.Price);
+                
+                _response.Result = cartDto;
+
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message;
+            }
+
+            return _response;
+        }
+
         [HttpPost("CartUpsert")]
         public async Task<ResponseDto> CartUpsert([FromBody] CartDtoIn cartDtoIn)
         {
@@ -58,13 +89,15 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         {
             try
             {
+                #region verifications
                 if (cartDetailsId == 0)
                     throw new ArgumentException("parameter value was 0", nameof(cartDetailsId));
 
                 var cartDetails = await _db.CartDetails
                     .FirstOrDefaultAsync(c => c.CartDetailsId == cartDetailsId) 
                         ?? throw new Exception($"CartDetails of Id {cartDetailsId} was not found.");
-                
+                #endregion
+
                 var totalCountOfCartItem = await _db.CartDetails
                     .CountAsync(c => c.CartDetailsId == cartDetailsId);
 
