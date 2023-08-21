@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.PortableExecutable;
+using System.Security.AccessControl;
 
 namespace Mango.Services.ShoppingCartAPI.Controllers
 {
@@ -53,6 +54,51 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 }
                 
                 _response.Result = cartDto;
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message;
+            }
+
+            return _response;
+        }
+
+        [HttpPost("ApplyCoupon")]
+        public async Task<object> ApplyCoupon([FromBody] CartCouponDto cartCouponDto)
+        {
+            try
+            {
+                var cartFromDb = await _db.CartHeaders
+                    .FirstAsync(c => c.UserId == cartCouponDto.UserId);
+                cartFromDb.CouponCode = cartCouponDto.CouponCode;
+                
+                _db.CartHeaders.Update(cartFromDb);
+                await _db.SaveChangesAsync();
+                
+                _response.Result = true;
+            }
+            catch (Exception ex) 
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message;
+            }
+
+            return _response;
+        }
+
+        [HttpPost("RemoveCoupon")]
+        public async Task<object> RemoveCoupon([FromBody] CartCouponDto cartCouponDto)
+        {
+            try
+            {
+                var cartFromDb = await _db.CartHeaders.FirstAsync(c => c.UserId == cartCouponDto.UserId);
+                cartFromDb.CouponCode = "";
+
+                _db.CartHeaders.Update(cartFromDb);
+                await _db.SaveChangesAsync();
+
+                _response.Result = true;
             }
             catch (Exception ex)
             {
