@@ -19,7 +19,7 @@ namespace Mango.Services.ShoppingCartAPI
                 c.CreateMap<CartDetails, CartDetailsDtoIn>().ReverseMap();
                 c.CreateMap<CartDetailsDto, CartDetailsDtoIn>().ReverseMap();
 
-                c.CreateMap<CartCouponDto, CartDetailsDtoIn>().ReverseMap();
+                c.CreateMap<CartCouponDto, CartHeadersDtoIn>().ReverseMap();
             });
 
             return mapperConfig;

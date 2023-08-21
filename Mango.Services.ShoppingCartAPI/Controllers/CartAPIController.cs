@@ -78,7 +78,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 
                 _response.Result = true;
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _response.IsSuccess = false;
                 _response.Message = ex.Message;
