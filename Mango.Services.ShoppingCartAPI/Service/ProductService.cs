@@ -23,9 +23,7 @@ namespace Mango.Services.ShoppingCartAPI.Service
             var response = JsonConvert.DeserializeObject<ResponseDto>(apiContent);
 
             if (response != null && response.IsSuccess) 
-            {
                 return JsonConvert.DeserializeObject<IEnumerable<ProductDto>>(Convert.ToString(response.Result));
-            }
 
             return new List<ProductDto>();
         }
