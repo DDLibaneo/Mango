@@ -22,11 +22,17 @@ IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
 
 var productApiUrl = builder.Configuration["ServiceUrls:ProductAPI"]
-    ?? throw new Exception("error finding configuration in program.cs");
+    ?? throw new Exception("error finding ProductAPI configuration in program.cs");
 
 builder.Services.AddHttpClient("Product", s => s.BaseAddress = new Uri(productApiUrl));
+
+var couponApiUrl = builder.Configuration["ServiceUrls:CouponAPI"]
+    ?? throw new Exception("error finding CouponAPI configuration in program.cs");
+
+builder.Services.AddHttpClient("Coupon", s => s.BaseAddress = new Uri(couponApiUrl));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
