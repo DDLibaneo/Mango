@@ -7,31 +7,49 @@ namespace Mango.Web.Services
     public class CartService : ICartService
     {
         private readonly IBaseService _baseService;
-        private readonly string COUPON_ROUTE = "/api/cart/";
+        private readonly string CART_ROUTE = "/api/cart/";
 
         public CartService(IBaseService baseService)
         {
             _baseService = baseService;
         }
 
-        public async Task<ResponseDto?> ApplyCouponsAsync(CartDto couponDto)
+        public async Task<ResponseDto?> ApplyCouponAsync(CartDto cartDto)
         {
-            throw new NotImplementedException();
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = SD.ApiType.POST,
+                Data = cartDto,
+                Url = SD.ShoppingCartAPI + CART_ROUTE + "ApplyCoupon"
+            });
         }
 
         public async Task<ResponseDto?> GetCartByUserIdAsync(string userId)
         {
-            throw new NotImplementedException();
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = SD.ApiType.GET,
+                Url = SD.ShoppingCartAPI + CART_ROUTE + $"GetCart/{userId}"
+            });
         }
 
         public async Task<ResponseDto?> RemoveFromCartAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = SD.ApiType.POST,
+                Url = SD.ShoppingCartAPI + CART_ROUTE + $"RemoveCart/{id}"
+            });
         }
 
-        public async Task<ResponseDto?> UpsertCartAsync(CartDto couponDto)
+        public async Task<ResponseDto?> UpsertCartAsync(CartDto cartDto)
         {
-            throw new NotImplementedException();
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = SD.ApiType.POST,
+                Data = cartDto,
+                Url = SD.ShoppingCartAPI + CART_ROUTE + "CartUpsert"
+            });
         }
     }
 }
