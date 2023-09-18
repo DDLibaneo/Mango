@@ -19,7 +19,7 @@ builder.Services.AddHttpClient<ICartService, CartService>();
 SD.CouponAPIBase = builder.Configuration["ServiceUrls:CouponAPI"];
 SD.ProductAPIBase = builder.Configuration["ServiceUrls:ProductAPI"];
 SD.AuthAPIBase = builder.Configuration["ServiceUrls:AuthAPI"];
-SD.AuthAPIBase = builder.Configuration["ServiceUrls:ShoppingCartAPI"];
+SD.ShoppingCartAPI = builder.Configuration["ServiceUrls:ShoppingCartAPI"];
 
 builder.Services.AddScoped<IBaseService, BaseService>();
 builder.Services.AddScoped<ICouponService, CouponService>();

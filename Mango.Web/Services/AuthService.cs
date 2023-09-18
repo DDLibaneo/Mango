@@ -16,32 +16,38 @@ namespace Mango.Web.Services
 
         public async Task<ResponseDto?> AssignRoleAsync(RegistrationRequestDto registrationRequestDto)
         {
-            return await _baseService.SendAsync(new RequestDto()
+            var request = new RequestDto()
             {
                 ApiType = SD.ApiType.POST,
                 Url = SD.AuthAPIBase + AUTH_ROUTE + "AssignRole",
                 Data = registrationRequestDto
-            });
+            };
+
+            return await _baseService.SendAsync(request);
         }
 
         public async Task<ResponseDto?> LoginAsync(LoginRequestDto loginRequestDto)
         {
-            return await _baseService.SendAsync(new RequestDto()
+            var request = new RequestDto()
             {
                 ApiType = SD.ApiType.POST,
                 Url = SD.AuthAPIBase + AUTH_ROUTE + "login",
                 Data = loginRequestDto
-            }, withBearer: false);
+            };
+
+            return await _baseService.SendAsync(request, withBearer: false);
         }
 
         public async Task<ResponseDto?> RegisterAsync(RegistrationRequestDto registrationRequestDto)
         {
-            return await _baseService.SendAsync(new RequestDto()
+            var request = new RequestDto()
             {
                 ApiType = SD.ApiType.POST,
                 Url = SD.AuthAPIBase + AUTH_ROUTE + "register",
                 Data = registrationRequestDto
-            }, withBearer: false);
+            };
+
+            return await _baseService.SendAsync(request, withBearer: false);
         }
     }
 }
