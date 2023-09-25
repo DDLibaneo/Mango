@@ -1,4 +1,5 @@
-﻿using Mango.Web.Models;
+﻿using IdentityModel;
+using Mango.Web.Models;
 using Mango.Web.Services.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,11 @@ namespace Mango.Web.Controllers
     public class HomeController : Controller
     {
         private readonly IProductService _productService;
+        private readonly ICartService _cartService;
 
-        public HomeController(IProductService productService)
+        public HomeController(ICartService cartService, IProductService productService)
         {
+            _cartService = cartService;
             _productService = productService;
         }
 
@@ -50,6 +53,47 @@ namespace Mango.Web.Controllers
                 productDto = JsonConvert.DeserializeObject<ProductDto>(result);
 
                 TempData["success"] = "Products found successfully";
+            }
+            else
+                TempData["error"] = response?.Message;
+
+            return View(productDto);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ActionName("ProductDetails")]
+
+        public async Task<IActionResult> ProductDetails(ProductDto productDto)
+        {
+            var cartDto = new CartDto
+            {
+                CartHeader = new CartHeaderDto
+                {
+                    UserId = User.Claims.Where(u => u.Type == JwtClaimTypes.Subject)
+                        ?.FirstOrDefault()?.Value
+                }
+            };
+
+            var cartDetailsDto = new CartDetailsDto
+            {
+                Count = productDto.Count,
+                ProductId = productDto.ProductId,
+            };
+
+            var cartDetailsDtos = new List<CartDetailsDto>()
+            {
+                cartDetailsDto
+            };
+
+            cartDto.CartDetails = cartDetailsDtos;
+
+            var response = await _cartService.UpsertCartAsync(cartDto);
+
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Item has been added to the shopping cart";
+                return RedirectToAction(nameof(Index));
             }
             else
                 TempData["error"] = response?.Message;

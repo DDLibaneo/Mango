@@ -6,7 +6,7 @@ public class CartDetailsDto
 
     public int CartHeaderId { get; set; }
 
-    public CartHeadersDto CartHeader { get; set; }
+    public CartHeaderDto CartHeader { get; set; }
 
     public int ProductId { get; set; }
 

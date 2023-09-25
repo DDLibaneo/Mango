@@ -1,6 +1,6 @@
 ﻿namespace Mango.Web.Models
 {
-    public class CartHeadersDto
+    public class CartHeaderDto
     {
         public int CartHeaderId { get; set; }
 
