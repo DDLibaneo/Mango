@@ -22,6 +22,53 @@ namespace Mango.Web.Controllers
             return View(await LoadCartDtoBasedOnLoggedInUser());
         }
 
+        public async Task<IActionResult> Remove(int cartDetailsId)
+        {
+            var userId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)
+                ?.FirstOrDefault()
+                ?.Value;
+
+            var response = await _cartService.RemoveFromCartAsync(cartDetailsId);
+
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Cart updated successfully";
+                return RedirectToAction(nameof(CartIndex));
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApplyCoupon(CartDto cartDto)
+        {
+            var response = await _cartService.ApplyCouponAsync(cartDto);
+
+            if (response != null && response.IsSuccess) 
+            {
+                TempData["success"] = "Coupon applied successfully";
+                return RedirectToAction(nameof(CartIndex));
+            };
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveCoupon(CartDto cartDto)
+        {
+            cartDto.CartHeader.CouponCode = "";
+
+            var response = await _cartService.ApplyCouponAsync(cartDto);
+
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Coupon removed successfully";
+                return RedirectToAction(nameof(CartIndex));
+            };
+
+            return View();
+        }
+
         public async Task<CartDto> LoadCartDtoBasedOnLoggedInUser()
         {
             var userId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)

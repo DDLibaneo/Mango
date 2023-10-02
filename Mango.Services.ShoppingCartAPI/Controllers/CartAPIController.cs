@@ -36,8 +36,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         {
             try
             {
-                var cartHeaderFromDb = _db.CartHeaders.FirstOrDefault(c => c.UserId == userId) 
-                    ?? throw new Exception($"cartHeader of userId {userId} could not be found.");
+                var cartHeaderFromDb = _db.CartHeaders.FirstOrDefault(c => c.UserId == userId);
 
                 var cartDetailsFromDb = _db.CartDetails.Where(c => c.CartHeaderId == cartHeaderFromDb.CartHeaderId);
 
@@ -166,7 +165,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 #endregion
 
                 var totalCountOfCartItem = await _db.CartDetails
-                    .CountAsync(c => c.CartDetailsId == cartDetailsId);
+                    .CountAsync(c => c.CartHeaderId == cartDetails.CartHeaderId);
 
                 _db.CartDetails.Remove(cartDetails);
 

@@ -16,12 +16,21 @@ namespace Mango.Web.Services
 
         public async Task<ResponseDto?> ApplyCouponAsync(CartDto cartDto)
         {
-            return await _baseService.SendAsync(new RequestDto()
+            var cartCouponDto = new CartCouponDto()
+            {
+                UserId = cartDto.CartHeader.UserId,
+                CouponCode = cartDto.CartHeader.CouponCode,
+            };
+
+            var response = await _baseService.SendAsync(new RequestDto()
             {
                 ApiType = SD.ApiType.POST,
-                Data = cartDto,
+                Data = cartCouponDto,
+         
                 Url = SD.ShoppingCartAPI + CART_ROUTE + "ApplyCoupon"
             });
+
+            return response;
         }
 
         public async Task<ResponseDto?> GetCartByUserIdAsync(string userId)
