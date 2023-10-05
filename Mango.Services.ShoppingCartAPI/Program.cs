@@ -4,6 +4,7 @@ using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Extensions;
 using Mango.Services.ShoppingCartAPI.Service;
 using Mango.Services.ShoppingCartAPI.Service.IService;
+using Mango.Services.ShoppingCartAPI.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -23,16 +24,20 @@ builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<BackendApiAuthenticationHttpClientHandler>();
 
 var productApiUrl = builder.Configuration["ServiceUrls:ProductAPI"]
     ?? throw new Exception("error finding ProductAPI configuration in program.cs");
 
-builder.Services.AddHttpClient("Product", s => s.BaseAddress = new Uri(productApiUrl));
+builder.Services.AddHttpClient("Product", s => s.BaseAddress = new Uri(productApiUrl))
+    .AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
 
 var couponApiUrl = builder.Configuration["ServiceUrls:CouponAPI"]
     ?? throw new Exception("error finding CouponAPI configuration in program.cs");
 
-builder.Services.AddHttpClient("Coupon", s => s.BaseAddress = new Uri(couponApiUrl));
+builder.Services.AddHttpClient("Coupon", s => s.BaseAddress = new Uri(couponApiUrl))
+    .AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>(); ;
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
