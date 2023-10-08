@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Mango.MessageBus;
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.Dto;
@@ -16,19 +17,26 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
     [ApiController]
     public class CartAPIController : ControllerBase
     {
-        private readonly IMapper _mapper;
-        private readonly AppDbContext _db;
-        private IProductService _productService;
+        private readonly IMapper _mapper;        
+        private readonly IProductService _productService;
         private readonly ICouponService _couponService;
+        private readonly IMessageBus _messageBus;
+        private readonly IConfiguration _configuration;
+        private readonly AppDbContext _db;
+
         private ResponseDto _response;
 
-        public CartAPIController(IMapper mapper, AppDbContext db, IProductService productService, ICouponService couponService)
+        public CartAPIController(IMapper mapper, AppDbContext db, 
+            IProductService productService, ICouponService couponService, 
+            IMessageBus messageBus, IConfiguration configuration)
         {
             _mapper = mapper;
-            _db = db;
-            _response = new ResponseDto();
             _productService = productService;
             _couponService = couponService;
+            _messageBus = messageBus;
+            _configuration = configuration;
+            _db = db;
+            _response = new ResponseDto();
         }
 
         [HttpGet("GetCart/{userId}")]
@@ -191,6 +199,23 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             return _response;
         }
 
+        [HttpPost("EmailCartRequest")]
+        public async Task<object> EmailCartRequest([FromBody] CartDto cartDto)
+        {
+            try
+            {
+                await _messageBus.PublishMessage(cartDto, _configuration.GetValue<string>("TopicAndQueueNames:EmailShoppingCart"));
+                _response.Result = true;
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message;
+            }
+
+            return _response;
+        }
+        
         private async Task CreateOrUpdateCartDetailsAsync(CartDtoIn cartDtoIn, CartHeaders? cartHeaderFromDb)
         {
             #region verifications
