@@ -12,11 +12,11 @@
         public static string ProductAPIBase { get; set; }
 
         public static string ShoppingCartAPI { get; set; }
+        
+        public static string OrderAPI { get; set; }
 
         public const string RoleAdmin = "ADMIN";
-
         public const string RoleCustomer = "CUSTOMER";
-
         public const string TokenCookie = "JWTToken";
 
         public enum ApiType

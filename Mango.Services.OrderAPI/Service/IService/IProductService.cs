@@ -1,9 +1,8 @@
 ﻿using Mango.Services.OrderAPI.Model.Dto;
 
-namespace Mango.Services.OrderAPI.Service.IService
+namespace Mango.Services.OrderAPI.Service.IService;
+
+public interface IProductService
 {
-    public interface IProductService
-    {
-        Task<IEnumerable<ProductDto>> GetProducts();
-    }
+    Task<IEnumerable<ProductDto>> GetProducts();
 }
