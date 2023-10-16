@@ -20,7 +20,7 @@ namespace Mango.Web.Services
             {
                 ApiType = SD.ApiType.POST,
                 Data = cartDto,
-                Url = SD.CouponAPIBase + ORDER_ROUTE + "CreateOrder"
+                Url = SD.OrderAPIBase + ORDER_ROUTE + "CreateOrder"
             };
 
             return await _baseService.SendAsync(request);
