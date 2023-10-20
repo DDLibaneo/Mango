@@ -51,8 +51,26 @@ public class CartController : Controller
         var orderHeaderDto = JsonConvert.DeserializeObject<OrderHeaderDto>(resultInString);
 
         if (response != null && response.IsSuccess) 
-        { 
-            //get stripe session and redirect to stripe to place order
+        {
+            // get stripe session and redirect to stripe to place order
+
+            var domain = Request.Scheme + "://" + Request.Host.Value + "/";
+
+            var stripedRequestDto = new StripeRequestDto
+            {
+                ApprovedUrl = domain + "cart/Confirmation?orderId=" + orderHeaderDto.OrderHeaderId,
+                CancelUrl = domain + "cart/checkout",
+                OrderHeader = orderHeaderDto
+            };
+
+            var stripeResponse = await _orderService.CreateStripeSession(stripedRequestDto);
+
+            var stripeResponseString = Convert.ToString(stripeResponse.Result);
+            var stripeResponseDeserialized = JsonConvert.DeserializeObject<StripeRequestDto>(stripeResponseString);
+
+            Response.Headers.Add("Location", stripeResponseDeserialized.StripeSessionUrl);
+
+            return new StatusCodeResult(303);
         }
 
         return View();

@@ -1,9 +1,10 @@
 ﻿using Mango.Web.Models;
 
-namespace Mango.Web.Services.IService
+namespace Mango.Web.Services.IService;
+
+public interface IOrderService
 {
-    public interface IOrderService
-    {
-        Task<ResponseDto?> CreateOrder(CartDto cartDto);
-    }
+    Task<ResponseDto?> CreateOrder(CartDto cartDto);
+
+    Task<ResponseDto?> CreateStripeSession(StripeRequestDto stripeRequestDto);
 }
