@@ -59,7 +59,7 @@ builder.Services.AddSwaggerGen(options =>
                     Type = ReferenceType.SecurityScheme,
                     Id = JwtBearerDefaults.AuthenticationScheme
                 }
-            }, new string[]{}
+            }, Array.Empty<string>()
         }
     });
 });
