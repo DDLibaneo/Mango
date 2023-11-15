@@ -69,7 +69,15 @@ public class OrderController : ControllerBase
                 SuccessUrl = stripeRequestDto.ApprovedUrl,
                 CancelUrl = stripeRequestDto.CancelUrl,
                 LineItems = new List<SessionLineItemOptions>(),
-                Mode = "payment",
+                Mode = "payment"
+            };
+
+            var discountsObj = new List<SessionDiscountOptions>()
+            {
+                new()
+                {
+                    Coupon = stripeRequestDto.OrderHeader.CouponCode
+                }
             };
 
             foreach (var item in stripeRequestDto.OrderHeader.OrderDetails)
@@ -89,6 +97,11 @@ public class OrderController : ControllerBase
                 };
 
                 options.LineItems.Add(sessionLineItem);
+            }
+
+            if (stripeRequestDto.OrderHeader.Discount > 0)
+            {
+                options.Discounts = discountsObj; 
             }
 
             var service = new SessionService();
@@ -111,6 +124,47 @@ public class OrderController : ControllerBase
 
         return _response;
     }
+
+    [Authorize]
+    [HttpPost("ValidateStripeSession")]
+    public async Task<ResponseDto> ValidateStripeSession([FromBody] int orderHeaderId)
+    {
+        try
+        {
+            var orderHeader = _db.OrderHeaders.First(u => u.OrderHeaderId == orderHeaderId);
+
+            var service = new SessionService();
+
+            var session = service.Get(orderHeader.StripeSessionId);
+
+            var paymentIntentService = new PaymentIntentService();
+
+            var paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
+
+            if (paymentIntent.Status == "succeeded")
+            {
+                orderHeader.PaymentIntentId = paymentIntent.Id;
+                orderHeader.Status = SD.Status_Approved;
+
+                await _db.SaveChangesAsync();
+
+                _response.Result = _mapper.Map<OrderHeaderDto>(orderHeader);
+                return _response;
+            }
+
+            _response.Message = "payment failed";
+            _response.IsSuccess = false;
+
+            return _response;
+        }
+        catch (Exception ex)
+        {
+            _response.Message = ex.Message;
+            _response.IsSuccess = false;
+            
+            return _response;
+        }
+    } 
 }
 
 

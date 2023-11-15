@@ -26,5 +26,12 @@
             PUT,
             DELETE
         }
+
+        public const string Status_Pending = "Pending";
+        public const string Status_Approved = "Approved";
+        public const string Status_ReadyForPickup = "ReadyFOrPickup";
+        public const string Status_Complete = "Complete";
+        public const string Status_Refunded = "Refunded";
+        public const string Status_Cancelled = "Cancelled";
     }
 }

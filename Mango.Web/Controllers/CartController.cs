@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Mango.Web.Models;
 using System.IdentityModel.Tokens.Jwt;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
+using System.Net;
+using Mango.Web.Utility;
 
 namespace Mango.Web.Controllers;
 
@@ -70,7 +73,7 @@ public class CartController : Controller
 
             Response.Headers.Add("Location", stripeResponseDeserialized.StripeSessionUrl);
 
-            return new StatusCodeResult(303);
+            return new StatusCodeResult((int)HttpStatusCode.SeeOther);
         }
 
         return View();
@@ -78,6 +81,17 @@ public class CartController : Controller
 
     public async Task<IActionResult> Confirmation(int orderId)
     {
+        var response = await _orderService.ValidateStripeSession(orderId);
+
+        if (response != null && response.IsSuccess)
+        {
+            var jsonResult = Convert.ToString(response.Result);
+            var orderHeader = JsonConvert.DeserializeObject<OrderHeaderDto>(jsonResult);
+
+            if (orderHeader.Status == SD.Status_Approved)
+                return View(orderId);
+        }
+
         return View(orderId);
     }
 
