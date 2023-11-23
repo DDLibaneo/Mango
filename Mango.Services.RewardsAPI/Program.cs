@@ -1,14 +1,16 @@
 using Mango.Services.RewardsAPI.Data;
+using Mango.Services.RewardsAPI.Messaging;
+using Mango.Services.RewardsAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+var optionBuilder = AddDatabaseServices(builder);
 
-builder.Services.AddDbContext<AppDbContext>(option =>
-{
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+builder.Services.AddSingleton(new RewardsService(optionBuilder.Options));
+
+builder.Services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -43,4 +45,16 @@ void ApplyMigration()
     {
         _db.Database.Migrate();
     }
+}
+
+static DbContextOptionsBuilder<AppDbContext> AddDatabaseServices(WebApplicationBuilder builder)
+{
+    builder.Services.AddDbContext<AppDbContext>(option =>
+    {
+        option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    });
+
+    var optionBuilder = new DbContextOptionsBuilder<AppDbContext>();
+    optionBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    return optionBuilder;
 }

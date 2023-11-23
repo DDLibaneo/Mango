@@ -1,8 +1,8 @@
-﻿using Mango.Services.RewardsAPI.Messages;
+﻿using Mango.Services.RewardsAPI.Models.Messages;
 
 namespace Mango.Services.RewardsAPI.Services.Interfaces;
 
-public interface IRewardsApiService
+public interface IRewardsService
 {
     Task UpdateRewards(RewardMessage rewardMessage);
 }

@@ -2,12 +2,12 @@
 using Mango.Services.RewardsAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
-using Mango.Services.RewardsAPI.Messages;
 using Mango.Services.RewardsAPI.Models;
+using Mango.Services.RewardsAPI.Models.Messages;
 
 namespace Mango.Services.RewardsAPI.Services;
 
-public class RewardsService(DbContextOptions<AppDbContext> dbOptions) : IRewardsApiService
+public class RewardsService(DbContextOptions<AppDbContext> dbOptions) : IRewardsService
 {
     private readonly DbContextOptions<AppDbContext> _dbOptions = dbOptions;
 
