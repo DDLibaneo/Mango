@@ -1,72 +1,73 @@
 ﻿using Mango.Services.EmailAPI.Data;
 using Mango.Services.EmailAPI.Models;
 using Mango.Services.EmailAPI.Models.Dto;
+using Mango.Services.EmailAPI.Models.Messages;
 using Mango.Services.EmailAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 
-namespace Mango.Services.EmailAPI.Services
+namespace Mango.Services.EmailAPI.Services;
+
+public class EmailService(DbContextOptions<AppDbContext> dbOptions) : IEmailService
 {
-    public class EmailService : IEmailService
+    private DbContextOptions<AppDbContext> _dbOptions = dbOptions;
+
+    public async Task EmailCartAndLog(CartDto cartDto)
     {
-        private DbContextOptions<AppDbContext> _dbOptions;
+        var message = new StringBuilder();
 
-        public EmailService(DbContextOptions<AppDbContext> dbOptions)
+        message.AppendLine("</br>Cart email requested ");
+        message.AppendLine("</br>Total " + cartDto.CartHeader.CartTotal);
+        message.AppendLine("</br>");
+        message.AppendLine("<ul>");
+
+        foreach (var item in cartDto.CartDetails)
         {
-            _dbOptions = dbOptions;
+            message.Append("<li>");
+            message.Append(item.Product.Name + " x " + item.Count);
+            message.Append("</li>");
         }
 
-        public async Task EmailCartAndLog(CartDto cartDto)
+        message.Append("</ul>");
+
+        await LogAndEmail(message.ToString(), cartDto.CartHeader.Email);
+    }
+
+    public async Task LogOrderPlaced(RewardMessage rewardDto)
+    {
+        var message = "New Order Placed. <br/> Order ID : " + rewardDto.OrderId;
+        await LogAndEmail(message, "dotnetmastery@gmail.com");
+    }
+
+    public async Task RegisterUserEmailAndLog(string email)
+    {
+        var message = "User registration successful. <br/> Email:  " + email;
+
+        await LogAndEmail(message, "admin@gmail.com");
+    }
+
+    private async Task<bool> LogAndEmail(string message, string email)
+    {
+        try
         {
-            var message = new StringBuilder();
-
-            message.AppendLine("</br>Cart email requested ");
-            message.AppendLine("</br>Total " + cartDto.CartHeader.CartTotal);
-            message.AppendLine("</br>");
-            message.AppendLine("<ul>");
-
-            foreach (var item in cartDto.CartDetails)
+            var emailLogger = new EmailLogger
             {
-                message.Append("<li>");
-                message.Append(item.Product.Name + " x " + item.Count);
-                message.Append("</li>");
-            }
+                Email = email,
+                EmailSent = DateTime.Now,
+                Message = message,
+            };
 
-            message.Append("</ul>");
+            await using var _db = new AppDbContext(_dbOptions);
 
-            await LogAndEmail(message.ToString(), cartDto.CartHeader.Email);
+            await _db.EmailLoggers.AddAsync(emailLogger);
+
+            await _db.SaveChangesAsync();
+
+            return true;
         }
-
-        public async Task RegisterUserEmailAndLog(string email)
+        catch (Exception ex)
         {
-            var message = "User registration successful. <br/> Email:  " + email;
-
-            await LogAndEmail(message, "admin@gmail.com");
-        }
-
-        private async Task<bool> LogAndEmail(string message, string email)
-        {
-            try
-            {
-                var emailLogger = new EmailLogger
-                {
-                    Email = email,
-                    EmailSent = DateTime.Now,
-                    Message = message,
-                };
-
-                await using var _db = new AppDbContext(_dbOptions);
-
-                await _db.EmailLoggers.AddAsync(emailLogger);
-
-                await _db.SaveChangesAsync();
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
+            return false;
         }
     }
 }
