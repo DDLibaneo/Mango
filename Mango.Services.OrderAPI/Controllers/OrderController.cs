@@ -5,11 +5,11 @@ using Mango.Services.OrderAPI.Model.Dto;
 using Mango.Services.OrderAPI.Service.IService;
 using Mango.Services.OrderAPI.Utility;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
 using Stripe;
 using Mango.MessageBus;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mango.Services.OrderAPI.Controllers;
 
@@ -21,6 +21,61 @@ public class OrderController(AppDbContext db,
 {
     protected ResponseDto _response = new();
     private readonly AppDbContext _db = db;
+
+    [Authorize]
+    [HttpGet("GetOrders")]
+    public ResponseDto? Get(string? userId = "")
+    {
+        try
+        {
+            IEnumerable<OrderHeader> objList;
+
+            if (User.IsInRole(SD.RoleAdmin))
+            {
+                objList = _db.OrderHeaders
+                    .Include(o => o.OrderDetails)
+                    .OrderByDescending(o => o.OrderHeaderId)
+                    .ToList();
+            }
+            else
+            {
+                objList = _db.OrderHeaders
+                    .Include(o => o.OrderDetails)
+                    .Where(o => o.UserId == userId)
+                    .OrderByDescending(o => o.OrderHeaderId)
+                    .ToList();
+            }
+
+            _response.Result = _mapper.Map<IEnumerable<OrderHeader>>(objList);
+        }
+        catch (Exception ex)
+        {
+            _response.IsSuccess = false;
+            _response.Message = ex.Message;
+        }
+
+        return _response;
+    }
+
+    [Authorize]
+    [HttpGet("GetOrders/{id:int}")]
+    public ResponseDto? Get(int id)
+    {
+        try
+        {
+            var orderHeader = _db.OrderHeaders.Include(o => o.OrderDetails)
+                .First(o => o.OrderHeaderId == id);
+
+            _response.Result = _mapper.Map<OrderHeaderDto>(orderHeader);
+        }
+        catch (Exception ex)
+        {
+            _response.IsSuccess = false;
+            _response.Message = ex.Message;
+        }
+
+        return _response;
+    }
 
     [Authorize]
     [HttpPost("CreateOrder")]
