@@ -46,7 +46,7 @@ public class OrderController(AppDbContext db,
                     .ToList();
             }
 
-            _response.Result = _mapper.Map<IEnumerable<OrderHeader>>(objList);
+            _response.Result = _mapper.Map<IEnumerable<OrderHeaderDto>>(objList);
         }
         catch (Exception ex)
         {
