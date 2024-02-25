@@ -4,6 +4,7 @@ using Mango.Web.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace Mango.Web.Controllers
@@ -72,9 +73,9 @@ namespace Mango.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll() 
+        public IActionResult GetAll(string status)
         {
-            IEnumerable<OrderHeaderDto> list;
+            IEnumerable<OrderHeaderDto> ordersHead;
 
             string userId = string.Empty;
 
@@ -84,11 +85,28 @@ namespace Mango.Web.Controllers
             var response = _orderService.GetAllOrder(userId).GetAwaiter().GetResult();
 
             if (response != null && response.IsSuccess)
-                list = JsonConvert.DeserializeObject<List<OrderHeaderDto>>(Convert.ToString(response.Result));
+            {
+				ordersHead = JsonConvert.DeserializeObject<List<OrderHeaderDto>>(Convert.ToString(response.Result));
+                
+                switch (status) 
+                {
+                    case "approved":
+						ordersHead = ordersHead.Where(u => u.Status == SD.Status_Approved);
+						break;
+					case "readyforpickup":
+						ordersHead = ordersHead.Where(u => u.Status == SD.Status_ReadyForPickup);
+						break;
+					case "cancelled":
+						ordersHead = ordersHead.Where(u => u.Status == SD.Status_Cancelled || u.Status == SD.Status_Refunded);
+						break;
+					default:
+						break;
+				}
+			}
             else 
-                list = new List<OrderHeaderDto>();
+                ordersHead = new List<OrderHeaderDto>();
 
-            return Json(new { data = list });
+            return Json(new { data = ordersHead });
         }
     }
 }
