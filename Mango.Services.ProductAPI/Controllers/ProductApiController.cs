@@ -11,20 +11,13 @@ namespace Mango.Services.ProductAPI.Controllers
 {
     [Route("api/product")]
     [ApiController]    
-    public class ProductApiController : ControllerBase
+    public class ProductApiController(AppDbContext db, IMapper mapper) : ControllerBase
     {
-        private readonly AppDbContext _db;
-        private ResponseDto _response;
-        private readonly IMapper _mapper;
+        private readonly AppDbContext _db = db;
+		private readonly ResponseDto _response = new();
+        private readonly IMapper _mapper = mapper;
 
-        public ProductApiController(AppDbContext db, IMapper mapper)
-        {
-            _db = db;
-            _response = new ResponseDto();
-            _mapper = mapper;
-        }
-
-        [HttpGet]
+		[HttpGet]
         public async Task<ResponseDto> GetAsync()
         {
             try
@@ -65,12 +58,38 @@ namespace Mango.Services.ProductAPI.Controllers
         {
             try
             {
-                var obj = _mapper.Map<Product>(productDto);
-                _db.Products.Add(obj);
+                var product = _mapper.Map<Product>(productDto);
+                _db.Products.Add(product);
 
                 await _db.SaveChangesAsync();
 
-                _response.Result = _mapper.Map<ProductDto>(obj);
+                if (productDto != null)
+                {
+                    var fileName = product.ProductId.ToString() + Path.GetExtension(productDto.Image.FileName);
+                    var filePath = @"wwwroot\ProductImages\" + fileName;
+                    var currentDirectory = Directory.GetCurrentDirectory();
+
+					var filePathDirectory = Path.Combine(currentDirectory, fileName);
+
+                    using (var fileStream = new FileStream(filePathDirectory, FileMode.Create))
+                    {
+                        productDto.Image.CopyTo(fileStream);
+                    }
+
+                    var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
+                    product.ImageUrl = baseUrl + "/ProductImages/" + filePath;
+                    product.ImageLocalPath = filePath;
+                }
+                else
+                {
+                    product.ImageUrl = "https://placehold.co/600x400";
+				}
+
+                _db.Products.Update(product);
+
+                await _db.SaveChangesAsync();
+
+                _response.Result = _mapper.Map<ProductDto>(product);
             }
             catch (Exception ex)
             {

@@ -4,15 +4,10 @@ using Mango.Web.Utility;
 
 namespace Mango.Web.Services
 {
-	public class ProductService : IProductService
+	public class ProductService(IBaseService baseService) : IProductService
 	{
-		private readonly IBaseService _baseService;
+		private readonly IBaseService _baseService = baseService;
 		private readonly string PRODUCT_ROUTE = "/api/product/";
-
-        public ProductService(IBaseService baseService)
-        {
-			_baseService = baseService;
-        }
 
 		public async Task<ResponseDto?> GetAllProductsAsync()
 		{
