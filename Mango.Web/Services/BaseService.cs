@@ -44,19 +44,36 @@ namespace Mango.Web.Services
                 {
                     var content = new MultipartFormDataContent();
 
-                    foreach (var prop in requestDto.Data.GetType().GetProperties())
+                    foreach (var property in requestDto.Data.GetType().GetProperties())
                     {
-                        var value = prop.GetValue(requestDto.Data);
+                        var propertyValue = property.GetValue(requestDto.Data);
 
-                        if (value is FormFile)
+                        if (propertyValue is FormFile)
                         {
-                            var file = (FormFile)value;
+                            var file = (FormFile)propertyValue;
+                            
                             if (file != null)
                             {
-                                content.Add(new StreamContent(file.OpenReadStream()), prop.Name, file.FileName);
+                                using (var streamContent = new StreamContent(file.OpenReadStream()))
+                                {
+                                    content.Add(streamContent, property.Name, file.FileName);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var propertyValueString = propertyValue == null 
+                                ? string.Empty 
+                                : propertyValue.ToString();
+
+                            using (var stringContent = new StringContent(propertyValueString ?? string.Empty))
+                            {
+                                content.Add(stringContent, property.Name);
                             }
                         }
                     }
+
+                    message.Content = content;
                 }
                 else
                 {
