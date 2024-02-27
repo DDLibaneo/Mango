@@ -54,7 +54,7 @@ namespace Mango.Services.ProductAPI.Controllers
 
         [HttpPost]
         [Authorize(Roles = "ADMIN")]
-        public async Task<ResponseDto> Post([FromBody] ProductDto productDto)
+        public async Task<ResponseDto> Post(ProductDto productDto)
         {
             try
             {
@@ -69,7 +69,7 @@ namespace Mango.Services.ProductAPI.Controllers
                     var filePath = @"wwwroot\ProductImages\" + fileName;
                     var currentDirectory = Directory.GetCurrentDirectory();
 
-					var filePathDirectory = Path.Combine(currentDirectory, fileName);
+					var filePathDirectory = Path.Combine(currentDirectory, filePath);
 
                     using (var fileStream = new FileStream(filePathDirectory, FileMode.Create))
                     {

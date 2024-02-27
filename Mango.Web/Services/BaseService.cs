@@ -8,17 +8,11 @@ using static Mango.Web.Utility.SD;
 
 namespace Mango.Web.Services
 {
-    public class BaseService : IBaseService
+    public class BaseService(IHttpClientFactory httpClientFactory, ITokenProvider tokenProvider) : IBaseService
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ITokenProvider _tokenProvider;
+        private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+        private readonly ITokenProvider _tokenProvider = tokenProvider;
         private readonly string APPLICATION_JSON = "application/json";
-
-        public BaseService(IHttpClientFactory httpClientFactory, ITokenProvider tokenProvider)
-        {
-            _httpClientFactory = httpClientFactory;
-            _tokenProvider = tokenProvider;
-        }
 
         public async Task<ResponseDto?> SendAsync(RequestDto requestDto, bool withBearer = true)
         {
@@ -54,10 +48,8 @@ namespace Mango.Web.Services
                             
                             if (file != null)
                             {
-                                using (var streamContent = new StreamContent(file.OpenReadStream()))
-                                {
-                                    content.Add(streamContent, property.Name, file.FileName);
-                                }
+                                var streamContent = new StreamContent(file.OpenReadStream());
+                                content.Add(streamContent, property.Name, file.FileName);
                             }
                         }
                         else
@@ -66,10 +58,8 @@ namespace Mango.Web.Services
                                 ? string.Empty 
                                 : propertyValue.ToString();
 
-                            using (var stringContent = new StringContent(propertyValueString ?? string.Empty))
-                            {
-                                content.Add(stringContent, property.Name);
-                            }
+                            var stringContent = new StringContent(propertyValueString ?? string.Empty);
+                            content.Add(stringContent, property.Name);
                         }
                     }
 
