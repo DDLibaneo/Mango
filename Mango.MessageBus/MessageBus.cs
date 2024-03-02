@@ -19,7 +19,7 @@ namespace Mango.MessageBus
         {
             await using var client = new ServiceBusClient(connectionString);
 
-            ServiceBusSender sender = client.CreateSender(topic_queue_Name);
+            await using ServiceBusSender sender = client.CreateSender(topic_queue_Name);
 
             var jsonMessage = JsonConvert.SerializeObject(message);
 
@@ -31,8 +31,6 @@ namespace Mango.MessageBus
             };
 
             await sender.SendMessageAsync(finalMessage);
-
-            await client.DisposeAsync();
         }
     }
 }
