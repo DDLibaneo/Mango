@@ -56,7 +56,7 @@ public class OrderService : IOrderService
         var request = new RequestDto
         {
             ApiType = SD.ApiType.GET,
-            Url = SD.OrderAPIBase + ORDER_ROUTE + "GetOrders/" + orderId
+            Url = SD.OrderAPIBase + ORDER_ROUTE + "GetOrder/" + orderId
         };
 
         var response = await _baseService.SendAsync(request);

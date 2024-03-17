@@ -58,7 +58,7 @@ public class OrderController(AppDbContext db,
     }
 
     [Authorize]
-    [HttpGet("GetOrders/{id:int}")]
+    [HttpGet("GetOrder/{id:int}")]
     public ResponseDto? Get(int id)
     {
         try

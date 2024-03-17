@@ -4,8 +4,11 @@ using Mango.Web.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection.PortableExecutable;
 
 namespace Mango.Web.Controllers
 {
@@ -27,7 +30,10 @@ namespace Mango.Web.Controllers
             var response = await _orderService.GetOrder(orderId);
 
             if (response != null && response.IsSuccess)
-                orderHeaderDto = JsonConvert.DeserializeObject<OrderHeaderDto>(Convert.ToString(response.Result));
+            {
+                var stringOrderHeader = Convert.ToString(response.Result);
+                orderHeaderDto = JsonConvert.DeserializeObject<OrderHeaderDto>(stringOrderHeader);
+            }
 
             if (!User.IsInRole(SD.RoleAdmin) && userId != orderHeaderDto.UserId)
                 return NotFound();
