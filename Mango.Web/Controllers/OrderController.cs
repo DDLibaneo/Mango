@@ -16,6 +16,7 @@ namespace Mango.Web.Controllers
     {
         private readonly IOrderService _orderService = orderService;
 
+        [Authorize]
         public IActionResult OrderIndex()
         {
             return View();
