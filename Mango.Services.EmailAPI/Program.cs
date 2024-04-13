@@ -26,11 +26,13 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(o => 
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(o => o.DocumentTitle = "EmailApi");
-}
+    o.DocumentTitle = "EmailApi";
+    o.SwaggerEndpoint("/swagger/v1/swagger.json", "EMAIL API");
+    o.RoutePrefix = string.Empty;
+});
 
 app.UseHttpsRedirection();
 
