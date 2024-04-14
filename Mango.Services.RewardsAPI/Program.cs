@@ -21,11 +21,14 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+app.UseSwagger();
+app.UseSwaggerUI(o =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    o.DocumentTitle = "RewardsAPI";
+    o.SwaggerEndpoint("/swagger/v1/swagger.json", "REWARDS API");
+    o.RoutePrefix = string.Empty;
+});
 
 app.UseHttpsRedirection();
 
