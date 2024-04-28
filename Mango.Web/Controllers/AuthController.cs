@@ -117,18 +117,28 @@ namespace Mango.Web.Controllers
 
             var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
 
+            var emailClaim = jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email);
+            var subClaim = jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
+            var nameClaim = jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Name);
+            var roleClaim = jwt.Claims.FirstOrDefault(c => c.Type == "role");
+
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Email, 
-                    jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email).Value),
-                new Claim(JwtRegisteredClaimNames.Sub, 
-                    jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub).Value),
-                new Claim(JwtRegisteredClaimNames.Name, 
-                    jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Name).Value),
-                new Claim(ClaimTypes.Name, 
-                    jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email).Value),
-                new Claim(ClaimTypes.Role,
-                    jwt.Claims.FirstOrDefault(c => c.Type == "role").Value)
+                new(JwtRegisteredClaimNames.Email, emailClaim != null 
+                    ? emailClaim.Value 
+                    : string.Empty),
+                new(JwtRegisteredClaimNames.Sub, subClaim != null 
+                    ? subClaim.Value 
+                    : string.Empty),
+                new(JwtRegisteredClaimNames.Name, nameClaim != null 
+                    ? nameClaim.Value 
+                    : string.Empty),
+                new(ClaimTypes.Name, emailClaim != null 
+                    ? emailClaim.Value 
+                    : string.Empty),
+                new(ClaimTypes.Role, roleClaim != null 
+                    ? roleClaim.Value 
+                    : string.Empty)
             };
 
             identity.AddClaims(claims);
