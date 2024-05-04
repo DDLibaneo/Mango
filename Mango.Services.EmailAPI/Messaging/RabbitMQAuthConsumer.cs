@@ -31,10 +31,9 @@ public class RabbitMQAuthConsumer : BackgroundService
 
         //_emailCartQueue = _configuration.GetValue<string>("TopicAndQueueNames:EmailShoppingCartQueue");
         //_registerUserQueue = _configuration.GetValue<string>("TopicAndQueueNames:RegisterUserQueue");
+
         var userRegisteredQueue = _configuration.GetValue<string>("TopicAndQueueNames:RegisterUserQueue");
         _channel.QueueDeclare(userRegisteredQueue, false, false, false, null);
-
-
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -60,6 +59,6 @@ public class RabbitMQAuthConsumer : BackgroundService
 
     private async Task HandleMessage(string email)
     {
-
+        await _emailService.RegisterUserEmailAndLog(email);
     }
 }

@@ -23,6 +23,28 @@ public class RabbitMQAuthMessageSender : IRabbitMQAuthMessageSender
     {
         try
         {
+            if (ConnectionExists())
+            {
+                using var channel = _connection.CreateModel();
+
+                channel.QueueDeclare(queueName, false, false, false, null);
+
+                var json = JsonConvert.SerializeObject(message);
+                var body = Encoding.UTF8.GetBytes(json);
+
+                channel.BasicPublish(exchange: "", routingKey: queueName, null, body: body);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
+
+    public void CreateConnection() 
+    {
+        try
+        {
             var factory = new ConnectionFactory
             {
                 HostName = _hostName,
@@ -31,20 +53,20 @@ public class RabbitMQAuthMessageSender : IRabbitMQAuthMessageSender
             };
 
             _connection = factory.CreateConnection();
-
-            using var channel = _connection.CreateModel();
-
-            channel.QueueDeclare(queueName, false, false, false, null);
-            
-            var json = JsonConvert.SerializeObject(message);
-            var body = Encoding.UTF8.GetBytes(json);
-
-            channel.BasicPublish(exchange: "", routingKey: queueName, null, body: body);
         }
         catch (Exception ex)
         {
-
             throw;
         }
+    }
+
+    public bool ConnectionExists()
+    {
+        if (_connection != null)
+            return true;
+
+        CreateConnection();
+
+        return true;
     }
 }
