@@ -11,6 +11,7 @@ var optionBuilder = AddDatabaseServices(builder);
 
 builder.Services.AddSingleton(new RewardsService(optionBuilder.Options));
 
+builder.Services.AddHostedService<RabbitMQOrderConsumer>();
 builder.Services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
 
 builder.Services.AddControllers();
