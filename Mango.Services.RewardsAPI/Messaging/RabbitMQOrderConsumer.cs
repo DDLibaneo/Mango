@@ -15,12 +15,15 @@ public class RabbitMQOrderConsumer : BackgroundService
     private IConnection _connection;
     private IModel _channel;
 
-    private string _queueName = string.Empty;
+    private readonly string OrderCreated_RewardsUpdateQueue = "RewardsUpdateQueue";
+    private readonly string ExchangeName = "";
 
     public RabbitMQOrderConsumer(IConfiguration configuration, RewardsService rewardsService)
     {
         _configuration = configuration;
         _rewardsService = rewardsService;
+
+        ExchangeName = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedTopic");
 
         var factory = new ConnectionFactory
         {
@@ -31,14 +34,12 @@ public class RabbitMQOrderConsumer : BackgroundService
 
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
-
-        var exchangeName = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedTopic");
         
-        _channel.ExchangeDeclare(exchangeName, ExchangeType.Fanout);
+        _channel.ExchangeDeclare(ExchangeName, ExchangeType.Direct);
 
-        _queueName =  _channel.QueueDeclare().QueueName;
+        _channel.QueueDeclare(OrderCreated_RewardsUpdateQueue, false, false, false, null);
 
-        _channel.QueueBind(_queueName, exchangeName, string.Empty);
+        _channel.QueueBind(OrderCreated_RewardsUpdateQueue, ExchangeName, "RewardsUpdate");
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -56,7 +57,7 @@ public class RabbitMQOrderConsumer : BackgroundService
             _channel.BasicAck(eventArgs.DeliveryTag, false);
         };
 
-        _channel.BasicConsume(_queueName, false, consumer);
+        _channel.BasicConsume(OrderCreated_RewardsUpdateQueue, false, consumer);
 
         return Task.CompletedTask;
     }
